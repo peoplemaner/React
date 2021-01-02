@@ -1,0 +1,55 @@
+import React, { useCallback, useState, useRef } from 'react';
+import TodoTemplate from './TodoList/js/TodoTemplate';
+import TodoInsert from './TodoList/js/TodoInsert';
+import TodoList from './TodoList/js/TodoList';
+
+function createBulkTodos() {
+    const array = [];
+    for (let i = 1; i <= 2500; i++) {
+        array.push({
+            id: i,
+            text: `할 일 ${i}`,
+            checked: false
+        });
+    }
+    return array;
+}
+
+const App = () => {
+    const [todos, setTodos] = useState(createBulkTodos);  
+    // createBulkTodos()형태로 넣어주면 리렌터링 될때 마다 함수 호출되며 createBulkTodos로 전달할 경우 첫 렌더링 때만 실행하게 됨.
+    /*const [todos, setTodos] = useState([
+        { id: 1, text: 'React Basic', checked: true },
+        { id: 2, text: 'Component Style', checked: true },
+        { id: 3, text: 'Make TodosApp', checked: false }
+    ]);*/
+
+    const nextId = useRef(todos.length + 1);
+
+    const onInsert = useCallback((text) => {
+        const todo = {
+            id: nextId.current,
+            text: text,
+            checked: false
+        };
+
+        setTodos(todos => todos.concat(todo));
+        nextId.current += 1;
+    }, []);
+
+    const onRemove = useCallback((id) => {
+        setTodos(todos => todos.filter(todo => todo.id !== id));
+    }, []);
+
+    const onToggle = useCallback((id) => {
+        setTodos(todos => todos.map(todo => todo.id === id ? { ...todo, checked: !todo.checked } : todo))
+    }, []);
+
+    return (
+      <TodoTemplate>
+          <TodoInsert onInsert={onInsert} />
+          <TodoList todos={ todos } onRemove={onRemove} onToggle={onToggle} />
+      </TodoTemplate>
+    );
+}
+export default App;
